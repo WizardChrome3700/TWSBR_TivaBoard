@@ -5,6 +5,7 @@
 	<projects>
 		<project>TWSBR_MPU9250</project>
 		<project>TWSBR_Wheel</project>
+		<project>TWSBR_PIDController</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
