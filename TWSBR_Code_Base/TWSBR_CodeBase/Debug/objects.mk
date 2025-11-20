@@ -1,8 +1,0 @@
-################################################################################
-# Automatically-generated file. Do not edit!
-################################################################################
-
-USER_OBJS :=
-
-LIBS := -l"/home/akshat/workspace_v12/TWSBR_ESP01_Tuner/Debug/TWSBR_ESP01_Tuner.lib" -l"/home/akshat/workspace_v12/TWSBR_PIDController/Debug/TWSBR_PIDController.lib" -l"/home/akshat/workspace_v12/TWSBR_Wheel/Debug/TWSBR_Wheel.lib" -l"/home/akshat/ti/TivaWare_C_Series-2.2.0.295/driverlib/ccs/Debug/driverlib.lib" -llibc.a -l"/home/akshat/workspace_v12/TWSBR_MPU9250/Debug/TWSBR_MPU9250.lib"
-
