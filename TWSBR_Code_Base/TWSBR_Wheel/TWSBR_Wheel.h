@@ -11,6 +11,7 @@
 #define PWM_FREQUENCY 2000
 
 void wheels_init();
+void wheels_getPosition(uint32_t* posn_array);
 void wheel_setSpeed(float control_input, int8_t wheel_id);
 
 #endif /* TWSBR_WHEEL_H_ */

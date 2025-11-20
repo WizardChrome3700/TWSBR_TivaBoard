@@ -6,6 +6,7 @@
 		<project>TWSBR_MPU9250</project>
 		<project>TWSBR_Wheel</project>
 		<project>TWSBR_PIDController</project>
+		<project>TWSBR_ESP01_Tuner</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

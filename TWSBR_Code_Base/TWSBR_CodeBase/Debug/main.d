@@ -26,6 +26,7 @@ main.obj: /home/akshat/ti/TivaWare_C_Series-2.2.0.295/driverlib/i2c.h
 main.obj: /home/akshat/workspace_v12/TWSBR_MPU9250/TWSBR_MPU9250.h
 main.obj: /home/akshat/workspace_v12/TWSBR_Wheel/TWSBR_Wheel.h
 main.obj: /home/akshat/workspace_v12/TWSBR_PIDController/TWSBR_PIDController.h
+main.obj: /home/akshat/workspace_v12/TWSBR_ESP01_Tuner/TWSBR_ESP01_Tuner.h
 
 ../main.c:
 
@@ -78,4 +79,6 @@ main.obj: /home/akshat/workspace_v12/TWSBR_PIDController/TWSBR_PIDController.h
 /home/akshat/workspace_v12/TWSBR_Wheel/TWSBR_Wheel.h:
 
 /home/akshat/workspace_v12/TWSBR_PIDController/TWSBR_PIDController.h:
+
+/home/akshat/workspace_v12/TWSBR_ESP01_Tuner/TWSBR_ESP01_Tuner.h:
 

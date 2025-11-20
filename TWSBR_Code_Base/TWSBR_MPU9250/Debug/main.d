@@ -16,13 +16,19 @@ main.obj: /home/akshat/ti/ccs1110/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/inclu
 main.obj: /home/akshat/ti/ccs1110/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/math.h
 main.obj: /home/akshat/ti/ccs1110/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/_defs.h
 main.obj: /home/akshat/ti/ccs1110/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/machine/_limits.h
+main.obj: /home/akshat/ti/ccs1110/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/string.h
+main.obj: /home/akshat/ti/ccs1110/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/xlocale/_string.h
 main.obj: /home/akshat/ti/TivaWare_C_Series-2.2.0.295/inc/hw_memmap.h
 main.obj: /home/akshat/ti/TivaWare_C_Series-2.2.0.295/inc/hw_types.h
 main.obj: /home/akshat/ti/TivaWare_C_Series-2.2.0.295/inc/hw_gpio.h
+main.obj: /home/akshat/ti/TivaWare_C_Series-2.2.0.295/inc/hw_uart.h
 main.obj: /home/akshat/ti/TivaWare_C_Series-2.2.0.295/driverlib/gpio.h
 main.obj: /home/akshat/ti/TivaWare_C_Series-2.2.0.295/driverlib/sysctl.h
 main.obj: /home/akshat/ti/TivaWare_C_Series-2.2.0.295/driverlib/pin_map.h
 main.obj: /home/akshat/ti/TivaWare_C_Series-2.2.0.295/driverlib/i2c.h
+main.obj: /home/akshat/ti/TivaWare_C_Series-2.2.0.295/driverlib/uart.h
+main.obj: /home/akshat/ti/TivaWare_C_Series-2.2.0.295/driverlib/rom.h
+main.obj: /home/akshat/ti/TivaWare_C_Series-2.2.0.295/driverlib/rom_map.h
 main.obj: ../TWSBR_MPU9250.h
 
 ../main.c:
@@ -57,11 +63,17 @@ main.obj: ../TWSBR_MPU9250.h
 
 /home/akshat/ti/ccs1110/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/machine/_limits.h:
 
+/home/akshat/ti/ccs1110/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/string.h:
+
+/home/akshat/ti/ccs1110/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/xlocale/_string.h:
+
 /home/akshat/ti/TivaWare_C_Series-2.2.0.295/inc/hw_memmap.h:
 
 /home/akshat/ti/TivaWare_C_Series-2.2.0.295/inc/hw_types.h:
 
 /home/akshat/ti/TivaWare_C_Series-2.2.0.295/inc/hw_gpio.h:
+
+/home/akshat/ti/TivaWare_C_Series-2.2.0.295/inc/hw_uart.h:
 
 /home/akshat/ti/TivaWare_C_Series-2.2.0.295/driverlib/gpio.h:
 
@@ -70,6 +82,12 @@ main.obj: ../TWSBR_MPU9250.h
 /home/akshat/ti/TivaWare_C_Series-2.2.0.295/driverlib/pin_map.h:
 
 /home/akshat/ti/TivaWare_C_Series-2.2.0.295/driverlib/i2c.h:
+
+/home/akshat/ti/TivaWare_C_Series-2.2.0.295/driverlib/uart.h:
+
+/home/akshat/ti/TivaWare_C_Series-2.2.0.295/driverlib/rom.h:
+
+/home/akshat/ti/TivaWare_C_Series-2.2.0.295/driverlib/rom_map.h:
 
 ../TWSBR_MPU9250.h:
 

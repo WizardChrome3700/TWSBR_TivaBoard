@@ -13,6 +13,7 @@
 #include "TWSBR_MPU9250.h"
 #include "TWSBR_Wheel.h"
 #include "TWSBR_PIDController.h"
+#include "TWSBR_ESP01_Tuner.h"
 
 // Global variables - ALL PRESERVED
 uint8_t accel_reg[6];
@@ -39,6 +40,10 @@ float control_output;
 bool ledState = false;
 uint32_t blinkInterval = 1000; // Start with 1s default
 uint32_t ledCounter = 0;       // Simple counter for timing
+
+// ESP01 fetch frequency control
+uint32_t esp01Counter = 0;
+uint32_t esp01FetchInterval = 500; // Fetch every 50 loops (50 * 10ms = 500ms)
 
 // Function to initialize LED
 void init_led(void)
@@ -78,6 +83,7 @@ void update_led_blink_speed(float angle)
         blinkInterval = 200;
     }
 }
+
 // Function to handle LED blinking (call this in main loop)
 void handle_led_blinking(void)
 {
@@ -114,6 +120,24 @@ void test_led(void)
     }
 }
 
+uint16_t adcVals[3] = {0};
+
+float kp_max = 40;
+float kp_min = 1;
+float ki_max = 0.5;
+float ki_min = 0.0;
+float kd_max = 20;
+float kd_min = 0;
+
+PID_Controller balance_pid = {
+    .Kp = 20.0f,
+    .Ki = 0.05f,
+    .Kd = 0.0f,
+    .integral = 0.0f,
+    .prev_error = 0.0f,
+    .integral_limit = 150.0f
+};
+
 int main(void)
 {
     // Initialize system clock
@@ -129,22 +153,38 @@ int main(void)
     mpu9250_init();
     delay_ms(100);
     wheels_init();
-    PID_Controller balance_pid = {
-        .Kp = 20.0f,
-        .Ki = 0.0f,
-        .Kd = 5.0f,
-        .integral = 0.0f,
-        .prev_error = 0.0f,
-        .integral_limit = 50.0f
-    };
+    // Enable processor interrupts
+    IntMasterEnable();
+
+    // Initialize UART0 for printing to USB
+    UART0_Init();
+
+    // Give ESP01 time to boot up
+    SysCtlDelay(SysCtlClockGet()/3);  // Delay ~1 second
+
+    // Send AT command to ESP01
+    UART0_PrintString("Sending AT command to ESP01...\r\n");
+
+    // Initialize UART1 for ESP01 communication
+    ESP01_Setup();
 
     // Calibrate sensors (keep stationary during calibration)
     mpu9250_calculate_bias();      // Calibrate accelerometer
     mpu9250_calibrate_gyro_bias(); // Calibrate gyroscope
 
-
     while(true)
     {
+        // ESP01 data fetching at lower frequency
+        esp01Counter++;
+        if (esp01Counter >= esp01FetchInterval) {
+            ESP01_fetchData(adcVals);
+            balance_pid.Kp = kp_min + (((float)adcVals[0]-416)/65535.0f)*(kp_max - kp_min);
+            balance_pid.Ki = ki_min + (((float)adcVals[1]-416)/65535.0f)*(kd_max - kd_min);
+            balance_pid.Kd = kd_min + (((float)adcVals[2]-416)/65535.0f)*(ki_max - ki_min);
+            esp01Counter = 0; // Reset counter
+        }
+
+        // HIGH FREQUENCY OPERATIONS (every 10ms)
         // Read accelerometer data
         mpu9250_readAcceleration(accel_reg, accelXYZ);
 
@@ -154,7 +194,7 @@ int main(void)
         // Calculate pitch angle using your existing function
         pitchAngle = mpu9250_calculate_pitch_degrees_robust(accelXYZ[0], accelXYZ[1], accelXYZ[2]);
 
-        mpu9250_kalmanFilter(&filteredPitch, gyroXYZ, accelXYZ);
+        mpu9250_kalmanFilter(&filteredPitch, gyroXYZ, accelXYZ, 10);
 
         // Update LED blink speed based on filtered pitch angle
         update_led_blink_speed(filteredPitch);
@@ -175,9 +215,28 @@ int main(void)
 
         // Now you have the control_output to drive your wheels
         // Example wheel control (adjust based on your wheel_setSpeed function):
-         wheel_setSpeed(-control_output, 0);
+        // Compute PID output
+        float pid_output = calculate_pid_control(&balance_pid, filteredPitch, gyroXYZ[0]);
 
-         wheels_getPosition(encoderPosn);
+        // Apply dynamic damping for high angular velocity
+        float dampingFactor = 1.0f / (1.0f + 0.02f * fabsf(gyroXYZ[0]));
+
+        // Detect upright crossing (zero-cross damping)
+        static bool lastSignPositive = false;
+        bool currentSignPositive = (filteredPitch > 0);
+
+        control_output = pid_output * dampingFactor;
+
+        if (lastSignPositive != currentSignPositive) {
+            // Reduce control effort upon crossing upright
+            control_output *= 0.5f;
+        }
+        lastSignPositive = currentSignPositive;
+
+        // Send to wheels
+        wheel_setSpeed(-control_output, 0);
+
+        wheels_getPosition(encoderPosn);
 
         // Delay before next read
         delay_ms(10);
@@ -185,9 +244,3 @@ int main(void)
 
     return 0;
 }
-
-// ALL YOUR EXISTING FUNCTIONS REMAIN HERE (delay_ms, delay_us, check_i2c_bus_status,
-// recover_i2c_bus, mpu9250_init, mpu9250_readBytes, mpu9250_calculate_bias,
-// mpu9250_apply_bias_correction, mpu9250_readAcceleration,
-// mpu9250_calculate_pitch_degrees_robust, and all gyro functions)
-// [ALL YOUR EXISTING CODE AFTER main() REMAINS UNCHANGED]

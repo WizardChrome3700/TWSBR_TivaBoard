@@ -23,14 +23,25 @@ void wheels_init()
     while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOB));
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOE); // Used to generate ENA signal
     while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOE));
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOD); // Used to generate ENB signal
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOD); // Used to read Encoder1 at PD6 and PD7
     while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOD));
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF); // Used to generate ENB signal at PF0
+    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOF));
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOC); // Used to read Encoder2 at PC5 and PC6
+    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOC));
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_QEI0); // Used to read motor2 Encoder
+    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_QEI0));
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_QEI1);
+    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_QEI1));
     SysCtlPWMClockSet(SYSCTL_PWMDIV_4);
     ui32PWMClock = SysCtlPWMClockGet();
     ui32Load = (ui32PWMClock / PWM_FREQUENCY) - 1;
 
     GPIOPinTypeGPIOOutput(GPIO_PORTE_BASE, GPIO_PIN_4); // Used to set PE4 as EnableA
-    GPIOPinTypeGPIOOutput(GPIO_PORTD_BASE, GPIO_PIN_6); // Used to set PD6 as EnableB
+    HWREG(GPIO_PORTF_BASE + GPIO_O_LOCK) = GPIO_LOCK_KEY;
+    HWREG(GPIO_PORTF_BASE + GPIO_O_CR) |= GPIO_PIN_0;
+    HWREG(GPIO_PORTF_BASE + GPIO_O_LOCK) = 0;
+    GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_0); // Used to set PF0 as EnableB
 
     // PB4 and PB5 as PWM outputs for Motor1
     GPIOPinTypePWM(GPIO_PORTB_BASE, GPIO_PIN_4);
@@ -38,11 +49,35 @@ void wheels_init()
     GPIOPinTypePWM(GPIO_PORTB_BASE, GPIO_PIN_5);
     GPIOPinConfigure(GPIO_PB5_M0PWM3);
 
+    GPIOPinTypeQEI(GPIO_PORTC_BASE, GPIO_PIN_5 | GPIO_PIN_6);
+    GPIOPinConfigure(GPIO_PC5_PHA1);
+    GPIOPinConfigure(GPIO_PC6_PHB1);
+    QEIConfigure(QEI1_BASE, QEI_CONFIG_CAPTURE_A_B | QEI_CONFIG_NO_RESET | QEI_CONFIG_NO_SWAP, 7000);
+    QEIFilterEnable(QEI1_BASE);
+    QEIFilterConfigure(QEI1_BASE, QEI_FILTCNT_3);
+    QEIPositionSet(QEI1_BASE, 0);
+    QEIVelocityEnable(QEI1_BASE);
+    QEIEnable(QEI1_BASE);
+
     // PB6 and PB7 as PWM outputs for Motor2
     GPIOPinTypePWM(GPIO_PORTB_BASE, GPIO_PIN_6);
     GPIOPinConfigure(GPIO_PB6_M0PWM0);
     GPIOPinTypePWM(GPIO_PORTB_BASE, GPIO_PIN_7);
     GPIOPinConfigure(GPIO_PB7_M0PWM1);
+
+    HWREG(GPIO_PORTD_BASE + GPIO_O_LOCK) = GPIO_LOCK_KEY;
+    HWREG(GPIO_PORTD_BASE + GPIO_O_CR) |= GPIO_PIN_6 | GPIO_PIN_7;
+    HWREG(GPIO_PORTD_BASE + GPIO_O_LOCK) = 0;
+
+    GPIOPinTypeQEI(GPIO_PORTD_BASE, GPIO_PIN_6 | GPIO_PIN_7);
+    GPIOPinConfigure(GPIO_PD6_PHA0);
+    GPIOPinConfigure(GPIO_PD7_PHB0);
+    QEIConfigure(QEI0_BASE, QEI_CONFIG_CAPTURE_A_B | QEI_CONFIG_NO_RESET | QEI_CONFIG_SWAP, 7000);
+    QEIFilterEnable(QEI0_BASE);
+    QEIFilterConfigure(QEI0_BASE, QEI_FILTCNT_3);
+    QEIPositionSet(QEI0_BASE, 0);
+    QEIVelocityEnable(QEI0_BASE);
+    QEIEnable(QEI0_BASE);
 
     // PB4, PB5, PB6, PB7 get their PWM from Module0
     SysCtlPeripheralEnable(SYSCTL_PERIPH_PWM0);
@@ -74,14 +109,20 @@ void wheels_init()
 
     // Enable Pins HIGH to drive the motors
     GPIOPinWrite(GPIO_PORTE_BASE, GPIO_PIN_4, GPIO_PIN_4); // Set EnableA HIGH to run motor1
-    GPIOPinWrite(GPIO_PORTD_BASE, GPIO_PIN_6, GPIO_PIN_6); // Set EnableB HIGH to run motor2
+    GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_0, GPIO_PIN_0); // Set EnableB HIGH to run motor2
+}
+
+void wheels_getPosition(uint32_t* posn_array)
+{
+    posn_array[0] = QEIPositionGet(QEI0_BASE);
+    posn_array[1] = QEIPositionGet(QEI1_BASE);
 }
 
 void wheel_setSpeed(float control_input, int8_t wheel_id)
 {
     float max_input = (float)(ui32Load/2);
-    if(control_input > max_input) { control_input = max_input; }
-    else if(control_input < -max_input) { control_input = -max_input; }
+    if(control_input >= max_input) { control_input = max_input-1; }
+    else if(control_input <= -max_input) { control_input = -max_input+1; }
 
     int32_t adjusted_input = (int32_t)control_input;
     uint32_t halfLoad = ui32Load / 2;
@@ -94,7 +135,7 @@ void wheel_setSpeed(float control_input, int8_t wheel_id)
         PWMPulseWidthSet(PWM0_BASE, PWM_OUT_2, ui8Adjust1); // CORRECT: PB4
         PWMPulseWidthSet(PWM0_BASE, PWM_OUT_3, ui8Adjust2); // CORRECT: PB5
     }
-    else if(wheel_id == 2)  // Use 2 for second motor
+    else if(wheel_id == 2)  // Use 2 instead of -1
     {
         // Motor 2: PB6 (M0PWM0) and PB7 (M0PWM1)
         ui8Adjust3 = halfLoad - adjusted_input;  // PB6
