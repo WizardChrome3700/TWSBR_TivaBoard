@@ -28,4 +28,7 @@
 |TB2      |2  |JST6B pin 6    |motor2_M1       |Motor 2 terminal B            |
 |R1       |-  |3.3V ↔ Tiva PB2|4.7kΩ           |Pull-up or signal conditioning|
 |R2       |-  |3.3V ↔ Tiva PB3|4.7kΩ           |Pull-up or signal conditioning|
-
+|ESP01    |7  |Tiva PB1       |ESP_RX          |UART Recieve(ESP) to UART Transmit(Tiva)|
+|ESP01    |2  |Tiva PB0       |ESP_TX          |UART Transmit(ESP) to UART Recieve(Tiva)
+|ESP01    |8  |Tiva +3.3 V    |3V3             |ESP_Vcc, Power ESP01          |
+|ESP01    |4  |Tiva +3.3 V    |3V3,ESP_CH_EN   |Enable ESP01 to communicate   |
