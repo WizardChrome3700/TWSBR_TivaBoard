@@ -1,3 +1,6 @@
+### Project Report:-
+[Group I ME6102 Presentation .pdf](https://github.com/WizardChrome3700/TWSBR_TivaBoard/blob/master/Group%20I%20ME6102%20Presentation%20.pdf) is the project presentation. There was no report but we were required to submit [build instructions](https://github.com/WizardChrome3700/TWSBR_TivaBoard/blob/master/Build_instructions.pdf).
+
 ### Pinout of Tiva C Launchpad
 ![TIVA TM4C123GH6PM](./EK-TM4C123GXL_Pinout.jpg "TIVA TM4C123GH6PM")
 
